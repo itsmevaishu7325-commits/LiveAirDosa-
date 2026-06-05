@@ -1,0 +1,2213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirDosa — AI-Powered Instant Drone Dosa Delivery</title>
+    <meta name="description" content="Sizzling hot, ultra-crispy South Indian dosas delivered directly to your balcony in under 5 minutes by AI-guided thermal-insulated drones. Try our flight simulator now!">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================
+           DESIGN SYSTEM & VARIABLES
+           ========================================== */
+        :root {
+            --bg-base: #060913;
+            --bg-surface: rgba(13, 20, 38, 0.6);
+            --bg-card: rgba(22, 32, 59, 0.4);
+            
+            --primary: #ff6b00;
+            --primary-rgb: 255, 107, 0;
+            --primary-hover: #ff852c;
+            --primary-glow: rgba(255, 107, 0, 0.25);
+            
+            --secondary: #00e5ff;
+            --secondary-rgb: 0, 229, 255;
+            --secondary-glow: rgba(0, 229, 255, 0.25);
+            
+            --accent-success: #10b981;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-dark: #64748b;
+            
+            --border-glass: rgba(255, 255, 255, 0.06);
+            --border-glow: rgba(255, 107, 0, 0.15);
+            
+            --font-headings: 'Space Grotesk', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ==========================================
+           BASE STYLES
+           ========================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+        }
+
+        body {
+            position: relative;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Ambient Glow Blobs */
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(140px);
+            opacity: 0.15;
+            mix-blend-mode: screen;
+        }
+        .glow-1 {
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+        }
+        .glow-2 {
+            background: radial-gradient(circle, var(--secondary) 0%, transparent 70%);
+            bottom: 20%;
+            left: -200px;
+        }
+        .glow-3 {
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            bottom: -100px;
+            right: -100px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 107, 0, 0.3);
+            border-radius: 5px;
+            border: 2px solid var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Typography Utilities */
+        h1, h2, h3, h4 {
+            font-family: var(--font-headings);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ==========================================
+           HEADER / GLASS NAVIGATION
+           ========================================== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(6, 9, 19, 0.7);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-glass);
+            transition: var(--transition-smooth);
+        }
+        header.scrolled {
+            padding: 8px 0;
+            background: rgba(6, 9, 19, 0.9);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+            transition: var(--transition-smooth);
+        }
+        header.scrolled .nav-container {
+            height: 64px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-headings);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: -0.03em;
+        }
+        .logo-orange {
+            color: var(--primary);
+        }
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), #ff9f43);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.4);
+            animation: pulse-glow 2s infinite alternate;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            position: relative;
+            padding: 8px 0;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--text-main);
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition-smooth);
+            border-radius: 2px;
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        .cta-nav {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), #ff4d00);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+        }
+        .cta-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 0, 0.5);
+            background: linear-gradient(135deg, #ff852c, #ff6b00);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1100;
+        }
+        .mobile-toggle span {
+            display: block;
+            width: 28px;
+            height: 3px;
+            background-color: var(--text-main);
+            border-radius: 3px;
+            transition: var(--transition-smooth);
+        }
+
+        /* ==========================================
+           HERO SECTION
+           ========================================== */
+        .hero {
+            padding: 180px 0 100px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 48px;
+            align-items: center;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 107, 0, 0.08);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            animation: pulse-border 2s infinite alternate;
+        }
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            animation: blink 1.2s infinite;
+        }
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 20px;
+            color: var(--text-main);
+            background: linear-gradient(135deg, #fff 30%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-title span {
+            background: linear-gradient(135deg, var(--primary) 0%, #ffbe53 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-tagline {
+            font-size: 1.25rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 48px;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--primary), #ff4d00);
+            color: white;
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 1rem;
+            box-shadow: 0 4px 20px rgba(255, 107, 0, 0.35);
+            transition: var(--transition-smooth);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 107, 0, 0.55);
+            background: linear-gradient(135deg, #ff852c, #ff6b00);
+        }
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1rem;
+            border: 1px solid var(--border-glass);
+            transition: var(--transition-smooth);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+        
+        /* Stats grid under Hero content */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            border-top: 1px solid var(--border-glass);
+            padding-top: 32px;
+        }
+        .stat-item h3 {
+            font-size: 2rem;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #fff, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-item p {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        /* Hero Image Container and Hologram effects */
+        .hero-visual {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hologram-ring-container {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-img {
+            width: 90%;
+            height: 90%;
+            object-fit: cover;
+            border-radius: 30px;
+            z-index: 10;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
+                        0 0 40px rgba(255, 107, 0, 0.15);
+            animation: float 6s ease-in-out infinite;
+        }
+        .holo-glow {
+            position: absolute;
+            width: 105%;
+            height: 105%;
+            background: radial-gradient(circle, rgba(255,107,0,0.15) 0%, transparent 60%);
+            z-index: 1;
+            animation: pulse-glow 3s infinite alternate;
+        }
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+        .ring-1 {
+            width: 110%;
+            height: 110%;
+            border-color: rgba(255, 107, 0, 0.25);
+            animation: rotate-cw 25s linear infinite;
+        }
+        .ring-2 {
+            width: 122%;
+            height: 122%;
+            border-color: rgba(0, 229, 255, 0.2);
+            animation: rotate-ccw 35s linear infinite;
+        }
+        .ring-3 {
+            width: 80%;
+            height: 80%;
+            border: 1px solid rgba(255, 107, 0, 0.05);
+        }
+
+        /* ==========================================
+           SECTION HEADING STYLE
+           ========================================== */
+        .section-header {
+            text-align: center;
+            max-width: 650px;
+            margin: 0 auto 64px auto;
+            position: relative;
+            z-index: 10;
+        }
+        .section-tag {
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            color: var(--text-main);
+            margin-bottom: 16px;
+        }
+
+        /* ==========================================
+           FEATURES SECTION
+           ========================================== */
+        .features {
+            padding: 100px 0;
+            position: relative;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 40px;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 107, 0, 0.04) 0%, transparent 60%);
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 107, 0, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+                        0 0 30px rgba(255, 107, 0, 0.1);
+        }
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        .feature-icon-wrapper {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            color: var(--primary);
+            transition: var(--transition-smooth);
+            box-shadow: inset 0 2px 5px rgba(255,255,255,0.05);
+        }
+        .feature-card:hover .feature-icon-wrapper {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+            transform: scale(1.05) rotate(5deg);
+        }
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+        .feature-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: auto;
+        }
+        .feature-card-glow {
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: var(--transition-smooth);
+            pointer-events: none;
+        }
+        .feature-card:hover .feature-card-glow {
+            opacity: 1;
+            transform: scale(1.5);
+        }
+
+        /* ==========================================
+           INTERACTIVE SIMULATOR SECTION
+           ========================================== */
+        .simulator-section {
+            padding: 100px 0;
+            position: relative;
+        }
+        .simulator-container {
+            background: linear-gradient(145deg, rgba(13, 20, 38, 0.8) 0%, rgba(6, 9, 19, 0.9) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 32px;
+            padding: 48px;
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            gap: 48px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Left Column: Form & Telemetry controls */
+        .sim-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            z-index: 10;
+        }
+        .sim-intro h3 {
+            font-size: 1.75rem;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .sim-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sim-form-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+        .sim-select {
+            background: rgba(6, 9, 19, 0.8);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ff6b00'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+            background-size: 18px;
+        }
+        .sim-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.15);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .sim-range {
+            flex-grow: 1;
+            accent-color: var(--primary);
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+        .range-val {
+            font-family: var(--font-headings);
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .btn-launch {
+            background: linear-gradient(135deg, var(--primary), #ff4d00);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 16px;
+            font-family: var(--font-headings);
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 20px rgba(255, 107, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .btn-launch:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 0, 0.5);
+            background: linear-gradient(135deg, #ff852c, #ff6b00);
+        }
+        .btn-launch:disabled {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            color: var(--text-dark);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .telemetry-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            border-top: 1px solid var(--border-glass);
+            padding-top: 24px;
+        }
+        .tel-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .tel-label {
+            font-size: 0.75rem;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .tel-value {
+            font-family: var(--font-headings);
+            font-size: 1.1rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        /* Right Column: Visual HUD & Drone Flight Path Grid */
+        .sim-display {
+            position: relative;
+            border-radius: 20px;
+            background: rgba(2, 6, 23, 0.75);
+            border: 1px solid var(--border-glass);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 400px;
+            z-index: 10;
+        }
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .hud-title {
+            color: var(--secondary);
+            font-family: var(--font-headings);
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .hud-status-blink {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-success);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        .hud-status-blink.offline {
+            background-color: #ef4444;
+        }
+        .hud-status-blink.flying {
+            background-color: var(--primary);
+        }
+        .hud-status-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Tactical Map Grid */
+        .tactical-map {
+            flex-grow: 1;
+            position: relative;
+            background: radial-gradient(circle, rgba(0,229,255,0.03) 0%, transparent 80%),
+                        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 25px 25px, 25px 25px;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .radar-sweep {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, rgba(0, 229, 255, 0.08) 0deg, transparent 90deg, transparent 360deg);
+            pointer-events: none;
+            animation: rotate-cw 8s linear infinite;
+        }
+        .map-marker {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.5s ease;
+            z-index: 10;
+        }
+        .marker-kitchen {
+            bottom: 20px;
+            left: 20px;
+            color: var(--primary);
+        }
+        .marker-destination {
+            top: 20px;
+            right: 20px;
+            color: var(--secondary);
+        }
+        .marker-drone {
+            bottom: 20px;
+            left: 20px;
+            color: var(--text-main);
+            filter: drop-shadow(0 0 10px var(--secondary));
+            transform: translate(0, 0);
+            transition: left 10s linear, bottom 10s linear;
+        }
+        .marker-label {
+            position: absolute;
+            white-space: nowrap;
+            font-size: 0.65rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            background: rgba(6, 9, 19, 0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border-glass);
+            top: -24px;
+        }
+
+        /* SVG flight path drawing */
+        .flight-path-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .path-line {
+            fill: none;
+            stroke: rgba(0, 229, 255, 0.15);
+            stroke-width: 2;
+            stroke-dasharray: 4 4;
+        }
+        .path-line-active {
+            fill: none;
+            stroke: var(--secondary);
+            stroke-width: 3;
+            stroke-dasharray: 600;
+            stroke-dashoffset: 600;
+        }
+        .path-line-active.animate {
+            animation: draw-path 10s linear forwards;
+        }
+
+        /* Terminal Console */
+        .sim-console {
+            margin-top: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            height: 90px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            scrollbar-width: thin;
+        }
+        .console-line {
+            line-height: 1.4;
+            opacity: 0.85;
+        }
+        .console-line.success {
+            color: var(--accent-success);
+        }
+        .console-line.info {
+            color: var(--secondary);
+        }
+        .console-line.warn {
+            color: var(--primary);
+        }
+
+        /* Delivered Modal Overlay */
+        .delivered-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 9, 19, 0.95);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            text-align: center;
+            padding: 24px;
+            border-radius: 20px;
+        }
+        .delivered-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .success-badge {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--accent-success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-success);
+            margin-bottom: 24px;
+            animation: scale-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+        .delivered-overlay h4 {
+            font-size: 1.75rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+        .delivered-overlay p {
+            font-size: 1rem;
+            margin-bottom: 24px;
+            max-width: 320px;
+        }
+        .btn-reset {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            color: var(--text-main);
+            padding: 10px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            font-weight: 600;
+        }
+        .btn-reset:hover {
+            border-color: var(--primary);
+            background: rgba(255, 107, 0, 0.05);
+        }
+
+        /* ==========================================
+           PRICING SECTION
+           ========================================== */
+        .pricing {
+            padding: 100px 0;
+            position: relative;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        .price-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 28px;
+            padding: 48px;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .price-card.popular {
+            border-color: rgba(255, 107, 0, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                        0 0 30px rgba(255, 107, 0, 0.05);
+            background: linear-gradient(180deg, rgba(22, 32, 59, 0.4) 0%, rgba(13, 20, 38, 0.6) 100%);
+        }
+        .price-card.popular::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        .popular-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, var(--primary), #ffbe53);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .price-header {
+            margin-bottom: 32px;
+        }
+        .price-name {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        .price-description {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+        .price-amount {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin: 24px 0 0 0;
+        }
+        .price-num {
+            font-family: var(--font-headings);
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+        }
+        .price-period {
+            color: var(--text-dark);
+            font-size: 1rem;
+        }
+
+        .price-features {
+            list-style: none;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .price-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+        .price-features svg {
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .price-card.popular .price-features svg {
+            color: var(--secondary);
+        }
+
+        .btn-price {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-family: var(--font-headings);
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            margin-top: auto;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .btn-price-free {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+        }
+        .btn-price-free:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .btn-price-premium {
+            background: linear-gradient(135deg, var(--primary), #ff4d00);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
+        }
+        .btn-price-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 0, 0.45);
+            background: linear-gradient(135deg, #ff852c, #ff6b00);
+        }
+
+        /* ==========================================
+           FOOTER SECTION
+           ========================================== */
+        footer {
+            background: #03050a;
+            border-top: 1px solid var(--border-glass);
+            padding: 80px 0 32px 0;
+            position: relative;
+            z-index: 10;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr repeat(3, 0.83fr);
+            gap: 48px;
+            margin-bottom: 64px;
+        }
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .footer-desc {
+            font-size: 0.95rem;
+            max-width: 320px;
+        }
+        .footer-socials {
+            display: flex;
+            gap: 16px;
+        }
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+            text-decoration: none;
+        }
+        .social-link:hover {
+            color: var(--primary);
+            background: rgba(255, 107, 0, 0.08);
+            border-color: rgba(255, 107, 0, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .footer-col h4 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-main);
+            margin-bottom: 24px;
+        }
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+        }
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 4px;
+        }
+
+        /* Newsletter */
+        .footer-newsletter {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .newsletter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+        }
+        .newsletter-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+        .newsletter-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.15);
+        }
+        .btn-newsletter {
+            background: linear-gradient(135deg, var(--primary), #ff4d00);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-family: var(--font-headings);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        .btn-newsletter:hover {
+            background: linear-gradient(135deg, #ff852c, #ff6b00);
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.35);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-glass);
+            padding-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .footer-bottom p {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+        }
+        .footer-bottom-links {
+            display: flex;
+            gap: 24px;
+        }
+        .footer-bottom-links a {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+        .footer-bottom-links a:hover {
+            color: var(--text-muted);
+        }
+
+        /* ==========================================
+           FLOATING "ORDER NOW" BUTTON
+           ========================================== */
+        .floating-cta {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 999;
+            background: linear-gradient(135deg, var(--primary), #ff3c00);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 10px 25px rgba(255, 107, 0, 0.5),
+                        0 0 30px rgba(255, 107, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: bouncy-float 3s ease-in-out infinite;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+        .floating-cta svg {
+            width: 28px;
+            height: 28px;
+            transition: var(--transition-smooth);
+        }
+        .floating-cta span {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+        .floating-cta:hover {
+            width: 160px;
+            border-radius: 35px;
+            animation-play-state: paused;
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(255, 107, 0, 0.6),
+                        0 0 40px rgba(255, 107, 0, 0.3);
+        }
+        .floating-cta:hover svg {
+            transform: rotate(15deg) translateY(-2px);
+        }
+        .floating-cta:hover span {
+            opacity: 1;
+            max-height: 20px;
+            margin-top: 4px;
+        }
+
+        /* ==========================================
+           SCROLL-TRIGGERED REVEAL ANIMATIONS
+           ========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.15s; }
+        .reveal-delay-2 { transition-delay: 0.3s; }
+        .reveal-delay-3 { transition-delay: 0.45s; }
+
+        /* ==========================================
+           KEYFRAME ANIMATIONS
+           ========================================== */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(1deg);
+            }
+        }
+        @keyframes bouncy-float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-16px);
+            }
+        }
+        @keyframes rotate-cw {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes rotate-ccw {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 15px rgba(255, 107, 0, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 35px rgba(255, 107, 0, 0.6);
+            }
+        }
+        @keyframes pulse-border {
+            0% {
+                border-color: rgba(255, 107, 0, 0.2);
+            }
+            100% {
+                border-color: rgba(255, 107, 0, 0.6);
+                box-shadow: 0 0 15px rgba(255, 107, 0, 0.08);
+            }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        @keyframes scale-up {
+            from { transform: scale(0.6); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes draw-path {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* ==========================================
+           RESPONSIVE MEDIA QUERIES
+           ========================================== */
+        @media (max-width: 992px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 64px;
+                text-align: center;
+            }
+            .hero {
+                padding: 140px 0 80px 0;
+            }
+            .hero-badge, .hero-buttons, .hero-stats {
+                justify-content: center;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .simulator-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                padding: 32px;
+            }
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+                max-width: 500px;
+            }
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: flex;
+            }
+            .nav-links {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                height: calc(100vh - 80px);
+                background: rgba(6, 9, 19, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                justify-content: center;
+                gap: 40px;
+                transform: translateX(100%);
+                transition: var(--transition-smooth);
+                border-top: 1px solid var(--border-glass);
+            }
+            .nav-links.open {
+                transform: translateX(0);
+            }
+            .nav-links a {
+                font-size: 1.4rem;
+            }
+            .cta-nav {
+                display: none;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            .floating-cta {
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+            }
+            .floating-cta:hover {
+                width: 60px;
+                border-radius: 50%;
+            }
+            .floating-cta:hover span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glow BG Layers -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <!-- ==========================================
+         HEADER / NAVBAR
+         ========================================== -->
+    <header id="header">
+        <div class="container nav-container">
+            <a href="#" class="logo" id="logoLink">
+                <div class="logo-icon">
+                    <!-- Custom Mini Drone SVG -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <span>Air<span class="logo-orange">Dosa</span></span>
+            </a>
+
+            <button class="mobile-toggle" id="menuToggle" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#features" class="nav-item">Features</a></li>
+                <li><a href="#simulator" class="nav-item">Flight Simulator</a></li>
+                <li><a href="#pricing" class="nav-item">Pricing Plans</a></li>
+                <li><a href="#simulator" class="cta-nav">Order Drone</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- ==========================================
+         HERO SECTION
+         ========================================== -->
+    <section class="hero" id="home">
+        <div class="container hero-grid">
+            <div class="hero-content reveal">
+                <div class="hero-badge">
+                    <span class="hero-badge-dot"></span>
+                    Now Serving Bengaluru Outer Ring Road
+                </div>
+                <h1 class="hero-title">
+                    Crispy Dosas.<br>Supersonic Speeds.<br><span>Delivered in 5 Mins.</span>
+                </h1>
+                <p class="hero-tagline">
+                    AI-optimized drone dispatch meets authentic stone-ground batter. Sizzling hot, crispy-edged dosas delivered straight to your balcony, guided by real-time thermal micro-sensors.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#simulator" class="btn-primary">
+                        <span>Launch Drone Simulator</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                    <a href="#features" class="btn-secondary">Explore Tech</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <h3 id="statDosas">4.9m+</h3>
+                        <p>Dosas Dropped</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3 id="statSpeed">180s</h3>
+                        <p>Avg Delivery</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>99.8%</h3>
+                        <p>Balcony Landing</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual reveal reveal-delay-2">
+                <div class="hologram-ring-container">
+                    <div class="holo-glow"></div>
+                    <div class="ring ring-1"></div>
+                    <div class="ring ring-2"></div>
+                    <div class="ring ring-3"></div>
+                    <!-- Generated Hero Image loaded locally -->
+                    <img src="./dosa_drone.png" alt="AirDosa Delivery Drone carrying crispy masala dosa" class="hero-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         FEATURES SECTION
+         ========================================== -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">High-Tech Kitchens</span>
+                <h2 class="section-title">Freshness Built at Speed</h2>
+                <p>We re-engineered the classic South Indian breakfast loop with autonomous flight dynamics and thermal insulation systems.</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Feature Card 1 -->
+                <div class="feature-card reveal reveal-delay-1">
+                    <div class="feature-icon-wrapper">
+                        <!-- Heat/Thermal Icon -->
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <h3>Supersonic Thermal Pods</h3>
+                    <p>Dosas are locked inside an active carbon induction vault, heating at exactly 180°C during flight to preserve absolute crispiness and ensure cheese-melt integrity.</p>
+                    <div class="feature-card-glow"></div>
+                </div>
+
+                <!-- Feature Card 2 -->
+                <div class="feature-card reveal reveal-delay-2">
+                    <div class="feature-icon-wrapper">
+                        <!-- Network/Route Icon -->
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Predictive Batter Spreading</h3>
+                    <p>Our Neural Network predicts order spikes using local weather, moisture, and road traffic. Batter hits the hot stone grill before you even confirm your OTP.</p>
+                    <div class="feature-card-glow"></div>
+                </div>
+
+                <!-- Feature Card 3 -->
+                <div class="feature-card reveal reveal-delay-3">
+                    <div class="feature-icon-wrapper">
+                        <!-- Balcony/Radar Icon -->
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="m16.2 7.8-2 2"></path>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg>
+                    </div>
+                    <h3>LiDAR Balcony Docking</h3>
+                    <p>Equipped with millimeter-wave radar, drones dodge trees, balconies, clotheslines, and local pigeons, landing perfectly to drop the package with surgical accuracy.</p>
+                    <div class="feature-card-glow"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         INTERACTIVE SIMULATOR SECTION
+         ========================================== -->
+    <section class="simulator-section" id="simulator">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">Live Order Simulation</span>
+                <h2 class="section-title">Test Drive Your Dosa Flight</h2>
+                <p>Customize your batter profile, choose your altitude, and watch an AI drone pilot navigate through a digital simulation of our Bengaluru airspace network.</p>
+            </div>
+
+            <div class="simulator-container reveal">
+                
+                <!-- Left: Form Controls -->
+                <div class="sim-controls">
+                    <div class="sim-intro">
+                        <h3>Flight Control Panel</h3>
+                        <p>Configure drone payload parameters below.</p>
+                    </div>
+
+                    <div class="sim-form-group">
+                        <label for="dosaSelect">Dosa Batter Loadout</label>
+                        <select id="dosaSelect" class="sim-select">
+                            <option value="masala">Classic Masala Dosa (Heavy Potato Core)</option>
+                            <option value="ghee">Paper Thin Ghee Roast (Ultra Crisp)</option>
+                            <option value="cheese">Cheese Chilli Podi Blast (Extra Payload)</option>
+                        </select>
+                    </div>
+
+                    <div class="sim-form-group">
+                        <label for="floorRange">Balcony Delivery Altitude</label>
+                        <div class="range-container">
+                            <input type="range" id="floorRange" class="sim-range" min="1" max="15" value="5">
+                            <span class="range-val" id="floorVal">Floor 5</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-launch" id="launchBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <span>Launch Drone Delivery</span>
+                    </button>
+
+                    <div class="telemetry-row">
+                        <div class="tel-item">
+                            <div class="tel-label">Drone Temp</div>
+                            <div class="tel-value" id="telTemp">180°C</div>
+                        </div>
+                        <div class="tel-item">
+                            <div class="tel-label">Cruising Wind</div>
+                            <div class="tel-value" id="telWind">8 km/h</div>
+                        </div>
+                        <div class="tel-item">
+                            <div class="tel-label">ETA</div>
+                            <div class="tel-value" id="telETA">10.0s</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Interactive HUD -->
+                <div class="sim-display">
+                    <!-- Delivered modal screen -->
+                    <div class="delivered-overlay" id="deliveryOverlay">
+                        <div class="success-badge">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <h4 id="successTitle">Dosa Dropped!</h4>
+                        <p id="successDesc">Your piping hot Ghee Roast has landed safely on Floor 5. Open your balcony door and dig in!</p>
+                        <button class="btn-reset" id="resetBtn">Return Drone to Base</button>
+                    </div>
+
+                    <div class="hud-header">
+                        <div class="hud-title">
+                            <span class="hud-status-blink offline" id="hudStatusBlink"></span>
+                            <span id="hudStatusTitle">Telemetry Offline</span>
+                        </div>
+                        <div class="hud-status-text" id="hudCoords">LAT: -- / LNG: --</div>
+                    </div>
+
+                    <!-- Tactical Map Grid -->
+                    <div class="tactical-map" id="mapArea">
+                        <div class="radar-sweep"></div>
+                        
+                        <!-- Map SVG path overlay -->
+                        <svg class="flight-path-svg">
+                            <!-- Background path line -->
+                            <path d="M 40,320 Q 150,220 200,180 T 360,40" class="path-line" />
+                            <!-- Animate drawing path line -->
+                            <path id="activePath" d="M 40,320 Q 150,220 200,180 T 360,40" class="path-line-active" />
+                        </svg>
+
+                        <!-- Kitchen Hub -->
+                        <div class="map-marker marker-kitchen">
+                            <span class="marker-label">AirDosa Kitchen</span>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+
+                        <!-- Balcony target -->
+                        <div class="map-marker marker-destination">
+                            <span class="marker-label" id="destinationLabel">Balcony (Floor 5)</span>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3h18v18H3z"></path>
+                                <path d="M3 9h18"></path>
+                                <path d="M9 21V9"></path>
+                            </svg>
+                        </div>
+
+                        <!-- Drone Marker -->
+                        <div class="map-marker marker-drone" id="droneMarker">
+                            <span class="marker-label" style="background:var(--secondary); color:#000; font-weight:700;">D-08</span>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path>
+                                <path d="m4.93 4.93 2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                            </svg>
+                        </div>
+
+                    </div>
+
+                    <!-- Telemetry Logs -->
+                    <div class="sim-console" id="consoleLogs">
+                        <div class="console-line info">> System ready. Select parameters and launch drone.</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         PRICING SECTION
+         ========================================== -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-tag">Flexible Subscriptions</span>
+                <h2 class="section-title">Airspace Membership Plans</h2>
+                <p>Choose the model that fits your morning routine. Zero tips, zero delays, absolute crispy perfection.</p>
+            </div>
+
+            <div class="pricing-grid">
+                <!-- Plan 1 -->
+                <div class="price-card reveal reveal-delay-1">
+                    <div class="price-header">
+                        <h3 class="price-name">Casual Flyer</h3>
+                        <p class="price-description">Perfect for weekend cheat days and mid-week craving attacks.</p>
+                        <div class="price-amount">
+                            <span class="price-num">Pay-As-You-Eat</span>
+                        </div>
+                    </div>
+
+                    <ul class="price-features">
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Standard Delivery Speed (10 min)
+                        </li>
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Standard Batter Selections
+                        </li>
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Shared Balcony Landing Ports
+                        </li>
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Live GPS Map Tracking
+                        </li>
+                    </ul>
+
+                    <a href="#simulator" class="btn-price btn-price-free">Select Simulator</a>
+                </div>
+
+                <!-- Plan 2 -->
+                <div class="price-card popular reveal reveal-delay-2">
+                    <div class="popular-badge">Top Choice</div>
+                    <div class="price-header">
+                        <h3 class="price-name">Infinite Batter</h3>
+                        <p class="price-description">For real South Indian food veterans who require breakfast on autopilot.</p>
+                        <div class="price-amount">
+                            <span class="price-num">₹1,999</span>
+                            <span class="price-period">/ month</span>
+                        </div>
+                    </div>
+
+                    <ul class="price-features">
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <strong>Supersonic Mach-1 Delivery</strong> (3-5 min)
+                        </li>
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Daily Dosa (up to 30 orders/mo)
+                        </li>
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Access to Special Edition batters (Ragi, Oats, Cheese Podi)
+                        </li>
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Priority drone airways reservation
+                        </li>
+                        <li>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Free Coconut & Tomato chutney packets
+                        </li>
+                    </ul>
+
+                    <a href="#simulator" class="btn-price btn-price-premium">Subscribe Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         FOOTER SECTION
+         ========================================== -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                
+                <div class="footer-brand reveal">
+                    <a href="#" class="logo">
+                        <div class="logo-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                        </div>
+                        <span>Air<span class="logo-orange">Dosa</span></span>
+                    </a>
+                    <p class="footer-desc">Re-imagining morning routines with drone engineering and culinary precision. Crispy golden dosas delivered straight out of the sky.</p>
+                    <div class="footer-socials">
+                        <a href="#" class="social-link" aria-label="Twitter">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Instagram">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="YouTube">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-col reveal reveal-delay-1">
+                    <h4>Tech Stack</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Thermal Inductors</a></li>
+                        <li><a href="#">Millimeter LiDAR</a></li>
+                        <li><a href="#">AI Flight Dispatch</a></li>
+                        <li><a href="#">Stone Grinding Tech</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col reveal reveal-delay-2">
+                    <h4>Company</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Flight Corridors</a></li>
+                        <li><a href="#">Press Kit</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">AirSpace API</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col reveal reveal-delay-3">
+                    <h4>AirSpace Intel</h4>
+                    <div class="footer-newsletter">
+                        <p style="font-size: 0.9rem;">Receive launch updates, priority corridor expansion, and local discounts.</p>
+                        <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed to AirDosa Intel updates!'); this.reset();">
+                            <input type="email" placeholder="balcony_pilot@email.com" class="newsletter-input" required aria-label="Email address">
+                            <button type="submit" class="btn-newsletter">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 AirDosa Aviation Pvt Ltd. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Airspace Guidelines</a>
+                    <a href="#">Privacy Protocol</a>
+                    <a href="#">Telemetry SLA</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         FLOATING BOUNCING "ORDER NOW" CTA
+         ========================================== -->
+    <a href="#simulator" class="floating-cta" id="floatingCta" aria-label="Order Now">
+        <!-- Floating Drone Dosa Icon -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="10 9 15 4 20 9"></polyline>
+            <path d="M4 20h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2z"></path>
+            <circle cx="7" cy="13" r="2"></circle>
+            <circle cx="17" cy="13" r="2"></circle>
+        </svg>
+        <span>Order Now</span>
+    </a>
+
+    <!-- ==========================================
+         JAVASCRIPT LOGIC
+         ========================================== -->
+    <script>
+        // --- 1. HEADER SCROLL & ACTIVE SECTION NAVIGATION ---
+        const header = document.getElementById('header');
+        const sections = document.querySelectorAll('section');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        window.addEventListener('scroll', () => {
+            // Header opacity change on scroll
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            // Update active nav links based on viewport scroll
+            let current = "";
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= (sectionTop - 120)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href').slice(1) === current) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // --- 2. MOBILE MENU TOGGLE ---
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const mobileLinks = document.querySelectorAll('.nav-links a');
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+            // Toggle hamburger animation styles if needed
+            const spans = menuToggle.querySelectorAll('span');
+            spans[0].style.transform = navLinks.classList.contains('open') ? 'rotate(45deg) translate(6px, 6px)' : 'none';
+            spans[1].style.opacity = navLinks.classList.contains('open') ? '0' : '1';
+            spans[2].style.transform = navLinks.classList.contains('open') ? 'rotate(-45deg) translate(6px, -6px)' : 'none';
+        });
+
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+                const spans = menuToggle.querySelectorAll('span');
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            });
+        });
+
+        // --- 3. SCROLL REVEAL ANIMATIONS (INTERSECTION OBSERVER) ---
+        const revealCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Trigger only once
+                }
+            });
+        };
+
+        const revealObserver = new IntersectionObserver(revealCallback, {
+            root: null,
+            threshold: 0.12, // Trigger when 12% is visible
+            rootMargin: "0px 0px -50px 0px"
+        });
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            revealObserver.observe(el);
+        });
+
+        // --- 4. COUNTER ANIMATION FOR HERO STATS ---
+        function animateCounter(id, start, end, duration, suffix = "") {
+            const obj = document.getElementById(id);
+            if (!obj) return;
+            
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Ease out quad formula
+                const easeValue = progress * (2 - progress);
+                const currentValue = Math.floor(easeValue * (end - start) + start);
+                
+                if (end >= 1000000) {
+                    obj.innerHTML = (currentValue / 1000000).toFixed(1) + 'm' + suffix;
+                } else {
+                    obj.innerHTML = currentValue + suffix;
+                }
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Trigger counters when hero section is shown
+        setTimeout(() => {
+            animateCounter("statDosas", 0, 4900000, 2000, "+");
+            animateCounter("statSpeed", 300, 180, 2000, "s");
+        }, 500);
+
+        // --- 5. INTERACTIVE DRONE SIMULATOR LOGIC ---
+        const floorRange = document.getElementById('floorRange');
+        const floorVal = document.getElementById('floorVal');
+        const launchBtn = document.getElementById('launchBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const activePath = document.getElementById('activePath');
+        const droneMarker = document.getElementById('droneMarker');
+        const destinationLabel = document.getElementById('destinationLabel');
+        const consoleLogs = document.getElementById('consoleLogs');
+        const deliveryOverlay = document.getElementById('deliveryOverlay');
+        
+        // HUD Live metrics elements
+        const telTemp = document.getElementById('telTemp');
+        const telWind = document.getElementById('telWind');
+        const telETA = document.getElementById('telETA');
+        const hudCoords = document.getElementById('hudCoords');
+        const hudStatusBlink = document.getElementById('hudStatusBlink');
+        const hudStatusTitle = document.getElementById('hudStatusTitle');
+        const successTitle = document.getElementById('successTitle');
+        const successDesc = document.getElementById('successDesc');
+
+        // Dynamic floor input range update
+        floorRange.addEventListener('input', (e) => {
+            const val = e.target.value;
+            floorVal.textContent = `Floor ${val}`;
+            destinationLabel.textContent = `Balcony (Floor ${val})`;
+            
+            // Adjust telemetry parameters dynamically based on altitude
+            const eta = (8 + (val * 0.4)).toFixed(1);
+            telETA.textContent = `${eta}s`;
+            
+            const wind = (6 + (val * 0.8)).toFixed(1);
+            telWind.textContent = `${wind} km/h`;
+        });
+
+        // Logs printer utility
+        function addLog(text, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            line.innerHTML = `[${time}] ${text}`;
+            consoleLogs.appendChild(line);
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }
+
+        // Live coordinate emulator updater
+        let coordInterval = null;
+        function startCoordinateSimulation() {
+            let flightProgress = 0;
+            coordInterval = setInterval(() => {
+                flightProgress += 1;
+                // Simulating moving near standard ORR coordinates
+                const lat = (12.9376 + (flightProgress * 0.0001)).toFixed(5);
+                const lng = (77.6914 + (flightProgress * 0.0001)).toFixed(5);
+                hudCoords.textContent = `LAT: ${lat} / LNG: ${lng}`;
+            }, 200);
+        }
+
+        function stopCoordinateSimulation() {
+            clearInterval(coordInterval);
+        }
+
+        // Launch Simulation Flow
+        launchBtn.addEventListener('click', () => {
+            const selectVal = document.getElementById('dosaSelect').value;
+            const floor = floorRange.value;
+            const etaVal = parseFloat(telETA.textContent);
+            
+            let selectedDosaName = "Classic Masala Dosa";
+            if (selectVal === 'ghee') selectedDosaName = "Paper Thin Ghee Roast";
+            if (selectVal === 'cheese') selectedDosaName = "Cheese Chilli Podi Blast";
+
+            // Disable controls
+            launchBtn.disabled = true;
+            floorRange.disabled = true;
+            document.getElementById('dosaSelect').disabled = true;
+
+            // Update UI status
+            hudStatusBlink.className = "hud-status-blink flying";
+            hudStatusTitle.textContent = "DRONE DISPATCHED (AUTONOMOUS)";
+            
+            // Clear console
+            consoleLogs.innerHTML = "";
+            addLog(`Initializing flight protocols for: ${selectedDosaName}...`, 'info');
+            
+            // Step 1: Pre-cooking
+            setTimeout(() => {
+                addLog(`Tawa temp stabilized at 210°C. Spreading organic batter.`, 'info');
+                telTemp.textContent = "195°C";
+            }, 1000);
+
+            // Step 2: Thermal vault loading
+            setTimeout(() => {
+                addLog(`Dosa crispiness index: 9.8/10. Loading thermal pod...`, 'info');
+                addLog(`Vacuum sealing pod. Active heater locked to 180°C.`, 'warn');
+                telTemp.textContent = "180°C";
+            }, 2500);
+
+            // Step 3: Launch
+            setTimeout(() => {
+                addLog(`Drone 08 launched. Calibrating flight path...`, 'info');
+                
+                // Trigger CSS animations on the SVG path and Drone marker
+                activePath.style.strokeDashoffset = "600";
+                activePath.classList.add('animate');
+                
+                // Drone animation from Kitchen (bottom-left) to Balcony (top-right)
+                // Using exact CSS transform transition matching the flight duration
+                droneMarker.style.transition = `left ${etaVal - 4}s linear 3.5s, bottom ${etaVal - 4}s linear 3.5s`;
+                
+                // Set positions to top right target
+                // Calculating relative target position roughly matching the marker destination
+                droneMarker.style.left = 'calc(100% - 60px)';
+                droneMarker.style.bottom = 'calc(100% - 60px)';
+                
+                startCoordinateSimulation();
+            }, 3500);
+
+            // Step 4: Mid-air cruise telemetry logs
+            setTimeout(() => {
+                addLog(`Cruising altitude reached: 120m. Evading municipal crow network...`, 'info');
+            }, 5500);
+
+            setTimeout(() => {
+                addLog(`Strong wind gust detected. Compensating with counter-torque vectors.`, 'warn');
+            }, 7000);
+
+            setTimeout(() => {
+                addLog(`Destination corridor sighted. Approaching Balcony (Floor ${floor}).`, 'info');
+                addLog(`Enabling millimeter LiDAR scans. Precision landing locks initialized.`, 'info');
+            }, 8500);
+
+            // Step 5: Complete & delivery modal overlay
+            setTimeout(() => {
+                addLog(`Hover position stable at ${floor * 3} meters altitude.`, 'info');
+                addLog(`Drone hatch open. Dosa pod lowered to balcony table.`, 'success');
+                addLog(`Delivery confirmed. Returning drone to base.`, 'success');
+                
+                stopCoordinateSimulation();
+                
+                // Show Success Screen
+                successTitle.textContent = `Dosa Dropped! 🚀`;
+                successDesc.textContent = `Your sizzling hot, ultra-crispy ${selectedDosaName} has landed safely on Floor ${floor}. Open your balcony doors, your breakfast has arrived!`;
+                
+                deliveryOverlay.classList.add('show');
+                hudStatusBlink.className = "hud-status-blink";
+                hudStatusTitle.textContent = "DELIVERED";
+            }, etaVal * 1000);
+        });
+
+        // Reset Simulator Flow
+        resetBtn.addEventListener('click', () => {
+            // Hide Overlay
+            deliveryOverlay.classList.remove('show');
+            
+            // Reset drone position
+            droneMarker.style.transition = 'none';
+            droneMarker.style.left = '20px';
+            droneMarker.style.bottom = '20px';
+            
+            // Reset path animation
+            activePath.classList.remove('animate');
+            // Force redraw hack
+            void activePath.offsetWidth; 
+
+            // Re-enable controls
+            launchBtn.disabled = false;
+            floorRange.disabled = false;
+            document.getElementById('dosaSelect').disabled = false;
+
+            // Reset HUD telemetry
+            hudStatusBlink.className = "hud-status-blink offline";
+            hudStatusTitle.textContent = "Telemetry Offline";
+            hudCoords.textContent = "LAT: -- / LNG: --";
+            
+            const floor = floorRange.value;
+            const eta = (8 + (floor * 0.4)).toFixed(1);
+            telETA.textContent = `${eta}s`;
+            telTemp.textContent = "180°C";
+
+            // Clear & setup initial console log
+            consoleLogs.innerHTML = "";
+            addLog(`Drone returned to base. Telemetry reset. Select parameters to relaunch.`, 'info');
+        });
+    </script>
+</body>
+</html>
